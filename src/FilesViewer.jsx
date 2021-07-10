@@ -1,7 +1,7 @@
 import { IconFolder, IconFile, IconFolderOpen } from "./Icons";
 
 export const FilesViewer = ({ files, onBack, onOpen }) => (
-  <table class="table">
+  <table className="table">
     <tbody>
       <tr className="clickable" onClick={onBack}>
         <td className="icon-row">

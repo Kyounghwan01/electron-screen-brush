@@ -1,11 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { FilesViewer } from "./FilesViewer";
 
 const fs = window.require("fs");
 const pathModule = window.require("path");
 
 // desktopCapturer 이걸로 캡쳐할꺼임
-const { desktopCapturer } = require("electron");
+// Error: TypeError: fs.existsSync is not a function 수정
+// const desktopCapturer = require("electron").desktopCapturer;
+const { desktopCapturer } = window.require("electron");
+
 const { app } = window.require("@electron/remote");
 
 const formatSize = size => {
@@ -19,6 +22,10 @@ const formatSize = size => {
 
 function App() {
   const [path, setPath] = useState(app.getAppPath());
+
+  useEffect(() => {
+    console.log(desktopCapturer.getSources);
+  }, []);
 
   const files = useMemo(
     () =>
