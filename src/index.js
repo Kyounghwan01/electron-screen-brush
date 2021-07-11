@@ -4,11 +4,13 @@ import ReactDOM from "react-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-import App from "./App";
+// import App from "./App";
+// import Snipper from "./Snipper/Snipper";
+import NewSnipper from "./Snipper/NewSnipper";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <NewSnipper />
   </React.StrictMode>,
   document.getElementById("root")
 );
