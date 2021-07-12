@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require("electron");
 
 const path = require("path");
 const isDev = require("electron-is-dev");
+const url = require("url");
 
 require("@electron/remote/main").initialize();
 
@@ -18,11 +19,21 @@ function createWindow() {
     }
   });
 
-  win.loadURL(
-    isDev
-      ? "http://localhost:3000?main"
-      : `file://${path.join(__dirname, "../build/index.html")}`
-  );
+  isDev
+    ? win.loadURL("http://localhost:3000?main")
+    : win.loadURL(
+        url.format({
+          pathname: path.join(__dirname, "../build/index.html"),
+          protocol: "file:",
+          slashes: true
+        }) + "?main"
+      );
+
+  // win.loadURL(
+  //   isDev
+  //     ? "http://localhost:3000?main"
+  //     : `file://${path.join(__dirname, "../build/index.html")}`
+  // );
 
   // if (isDev) {
   //   win.webContents.openDevTools();
