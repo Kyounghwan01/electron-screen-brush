@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Snipper.scss";
 // import Cropper from "./Cropper";
 import Jimp from "jimp/es";
+import { v4 } from "uuid";
 
 const { ipcRenderer, desktopCapturer, shell, remote } =
   window.require("electron");
@@ -9,10 +10,9 @@ const { screen } = remote; // Main process modules
 
 // const BrowserWindow = remote.BrowserWindow;
 const dev = process.env.NODE_ENV === "development";
-// const path = require("path");
+const path = window.require("path");
 const screenSize = screen.getPrimaryDisplay().size;
-// const { v4: uuidv4 } = require("uuid");
-// const fs = require("fs");
+const fs = window.require("fs");
 
 const NewSnipper = () => {
   const [view, setView] = useState("");
@@ -160,6 +160,24 @@ const NewSnipper = () => {
     // resizeWindowFor("main");
   };
 
+  const saveToDisk = () => {
+    const directory = remote.app.getPath("pictures"); // Users/ky/Pictures
+    const filepath = path.join(directory + "/" + v4() + ".png");
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory);
+    }
+    fs.writeFile(
+      filepath,
+      image.replace(/^data:image\/(png|gif|jpeg);base64,/, ""),
+      "base64",
+      err => {
+        if (err) console.log(err);
+        shell.showItemInFolder(filepath); // 저장한 파일 리렉토리 open
+        discardSnip(null);
+      }
+    );
+  };
+
   return (
     <>
       {view === "main" ? (
@@ -195,10 +213,7 @@ const NewSnipper = () => {
               </div>
             ) : (
               <div>
-                <button
-                  className="btn btn-primary mr-1"
-                  // onClick={this.saveToDisk.bind(this)}
-                >
+                <button className="btn btn-primary mr-1" onClick={saveToDisk}>
                   Save to Disk
                 </button>
 
