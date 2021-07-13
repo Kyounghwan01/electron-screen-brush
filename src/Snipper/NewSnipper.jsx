@@ -3,6 +3,8 @@ import "./Snipper.scss";
 // import Cropper from "./Cropper";
 import Jimp from "jimp/es";
 import { v4 } from "uuid";
+import SelectBox from "../components/SelectBox";
+import { saveToDisk, getImgUrl, getScreenShot } from "../utils";
 
 const { ipcRenderer, desktopCapturer, shell, remote } =
   window.require("electron");
@@ -20,12 +22,26 @@ const NewSnipper = () => {
   const [image, setImage] = useState("");
   const [coordinate, setCoordinates] = useState(null);
   const [currentWindow] = useState(remote.getCurrentWindow());
+  const [windowList, setWindowList] = useState([]);
+  const [selectWindow, setSelectWindow] = useState("");
   const [mode, setMode] = useState("fullScreen");
 
   useEffect(() => {
     const context = global.location.search;
     setView(context.substr(1, context.length - 1));
+
+    setWindows();
   }, []);
+
+  useEffect(() => {
+    setImage("");
+    setSaveControls(false);
+  }, [selectWindow]);
+
+  const setWindows = async () => {
+    const res = await desktopCapturer.getSources({ types: ["screen"] });
+    setWindowList(res);
+  };
 
   const destoryCurrentWindow = () => {
     currentWindow.close();
@@ -44,41 +60,6 @@ const NewSnipper = () => {
       let x = screenSize.width / 2 - width / 2;
       let y = screenSize.height / 2 - height / 2;
       currentWindow.setPosition(x, y);
-    }
-  };
-
-  const getScreenShot = async imageFormat => {
-    try {
-      imageFormat = imageFormat || "image/png";
-      const sources = await desktopCapturer.getSources({ types: ["screen"] });
-
-      console.log("desktopCapturer getSources");
-      for (const source of sources) {
-        if (source.name === "Screen 1") {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              audio: false,
-              video: {
-                mandatory: {
-                  chromeMediaSource: "desktop",
-                  chromeMediaSourceId: source.id,
-                  minWidth: 1280,
-                  maxWidth: 4000,
-                  minHeight: 720,
-                  maxHeight: 4000
-                }
-              }
-            });
-            console.log("stream getUserMedia res", stream);
-            handleStream(stream, imageFormat);
-          } catch (e) {
-            console.log(e);
-          }
-          return;
-        }
-      }
-    } catch (e) {
-      console.log(e);
     }
   };
 
@@ -102,7 +83,12 @@ const NewSnipper = () => {
       ctx.drawImage(video_dom, 0, 0, canvas.width, canvas.height);
 
       // Save screenshot to base64
-      getImgUrl(canvas.toDataURL(imageFormat));
+      getImgUrl(canvas.toDataURL(imageFormat), mode, coordinate, base64data => {
+        setImage(base64data);
+        setSaveControls(true);
+        // resizeWindowFor("snip");
+        currentWindow.show();
+      });
 
       // Remove hidden video tag
       video_dom.remove();
@@ -118,64 +104,17 @@ const NewSnipper = () => {
     document.body.appendChild(video_dom);
   };
 
-  const getImgUrl = async base64data => {
-    // add to buffer base64 image instead of saving locally in order to manipulate with Jimp
-    let encondedImageBuffer = new Buffer(
-      base64data.replace(/^data:image\/(png|gif|jpeg);base64,/, ""),
-      "base64"
-    );
-
-    Jimp.read(encondedImageBuffer, (err, image) => {
-      if (err) throw err;
-
-      const crop =
-        mode === "fullScreen"
-          ? image
-          : image.crop(
-              coordinate.x,
-              coordinate.y,
-              parseInt(coordinate.width, 10),
-              parseInt(coordinate.height, 10)
-            );
-
-      crop.getBase64("image/png", (err, base64data) => {
-        setImage(base64data);
-        setSaveControls(true);
-        // resizeWindowFor("snip");
-        currentWindow.show();
-      });
-    });
-  };
-
   const captureScreen = (coordinates, mode) => {
     currentWindow.hide();
     setMode(mode);
     setCoordinates(coordinates);
-    getScreenShot();
+    getScreenShot(null, selectWindow, handleStream);
   };
 
   const discardSnip = () => {
     setImage("");
     setSaveControls(false);
     // resizeWindowFor("main");
-  };
-
-  const saveToDisk = () => {
-    const directory = remote.app.getPath("pictures"); // Users/ky/Pictures
-    const filepath = path.join(directory + "/" + v4() + ".png");
-    if (!fs.existsSync(directory)) {
-      fs.mkdirSync(directory);
-    }
-    fs.writeFile(
-      filepath,
-      image.replace(/^data:image\/(png|gif|jpeg);base64,/, ""),
-      "base64",
-      err => {
-        if (err) console.log(err);
-        shell.showItemInFolder(filepath); // 저장한 파일 리렉토리 open
-        discardSnip(null);
-      }
-    );
   };
 
   return (
@@ -195,25 +134,34 @@ const NewSnipper = () => {
               <h2>Snipper</h2>
             </div>
 
-            {!saveControls ? (
-              <div>
-                <button
-                  className="btn btn-primary mr-1"
-                  onClick={() => captureScreen(null, "fullScreen")}
-                >
-                  Fullscreen
-                </button>
+            <SelectBox list={windowList} setter={setSelectWindow} />
 
-                <button
-                  className="btn btn-primary mr-1"
-                  // onClick={this.initCropper.bind(this)}
-                >
-                  Crop Image
-                </button>
-              </div>
+            {!saveControls ? (
+              <>
+                {selectWindow && (
+                  <div>
+                    <button
+                      className="btn btn-primary mr-1"
+                      onClick={() => captureScreen(null, "fullScreen")}
+                    >
+                      Fullscreen
+                    </button>
+
+                    <button
+                      className="btn btn-primary mr-1"
+                      // onClick={this.initCropper.bind(this)}
+                    >
+                      Crop Image
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div>
-                <button className="btn btn-primary mr-1" onClick={saveToDisk}>
+                <button
+                  className="btn btn-primary mr-1"
+                  onClick={() => saveToDisk(image, discardSnip)}
+                >
                   Save to Disk
                 </button>
 
