@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
 import "./Snipper.scss";
-// import Cropper from "./Cropper";
-import Jimp from "jimp/es";
-import { v4 } from "uuid";
+import Cropper from "./Cropper";
 import SelectBox from "../components/SelectBox";
 import { saveToDisk, getImgUrl, getScreenShot } from "../utils";
 
-const { ipcRenderer, desktopCapturer, shell, remote } =
-  window.require("electron");
-const { screen } = remote; // Main process modules
+const { ipcRenderer, desktopCapturer, remote } = window.require("electron");
+const path = require("path");
+const url = require("url");
 
-// const BrowserWindow = remote.BrowserWindow;
+const { screen } = remote;
+
+const BrowserWindow = remote.BrowserWindow;
 const dev = process.env.NODE_ENV === "development";
-const path = window.require("path");
 const screenSize = screen.getPrimaryDisplay().size;
-const fs = window.require("fs");
+
+let snipWindow = null,
+  mainWindow = null;
 
 const NewSnipper = () => {
   const [view, setView] = useState("");
@@ -43,7 +44,7 @@ const NewSnipper = () => {
     setWindowList(res);
   };
 
-  const destoryCurrentWindow = () => {
+  const destroyCurrentWindow = () => {
     currentWindow.close();
   };
 
@@ -117,6 +118,63 @@ const NewSnipper = () => {
     // resizeWindowFor("main");
   };
 
+  const initCropper = () => {
+    mainWindow = currentWindow;
+    mainWindow.hide();
+
+    snipWindow = new BrowserWindow({
+      width: screenSize.width,
+      height: screenSize.height,
+      frame: false,
+      transparent: true,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+        contextIsolation: false
+      }
+    });
+
+    snipWindow.on("close", () => {
+      snipWindow = null;
+    });
+
+    ipcRenderer.once("snipCropImage", (event, data) => {
+      captureScreen(data, null);
+    });
+
+    ipcRenderer.once("cancelled", event => {
+      mainWindow.show();
+    });
+
+    snipWindow.loadURL(
+      global.location.hostname === "localhost"
+        ? "http://localhost:3000?snip"
+        : url.format({
+            pathname: path.join(__dirname, "../build/index.html"),
+            protocol: "file:",
+            slashes: true
+          }) + "?snip"
+    );
+    snipWindow.setResizable(false);
+  };
+
+  const getMainInstance = () => {
+    let instances = BrowserWindow.getAllWindows();
+    return instances.filter(instance => {
+      return instance.id !== currentWindow.id;
+    })[0];
+  };
+
+  const snapShootCropImage = state => {
+    getMainInstance().webContents.send("snipCropImage", state);
+    destroyCurrentWindow(null);
+  };
+
+  const destroySnipView = () => {
+    getMainInstance().webContents.send("cancelled");
+    destroyCurrentWindow(null);
+  };
+
   return (
     <>
       {view === "main" ? (
@@ -125,7 +183,7 @@ const NewSnipper = () => {
             <span
               className="close"
               title="close"
-              onClick={destoryCurrentWindow}
+              onClick={destroyCurrentWindow}
             >
               &times;
             </span>
@@ -149,7 +207,7 @@ const NewSnipper = () => {
 
                     <button
                       className="btn btn-primary mr-1"
-                      // onClick={this.initCropper.bind(this)}
+                      onClick={initCropper}
                     >
                       Crop Image
                     </button>
@@ -179,11 +237,11 @@ const NewSnipper = () => {
           )}
         </>
       ) : (
-        // <Cropper
-        // snip={this.snip.bind(this)}
-        // destroySnipView={this.destroySnipView.bind(this)}
-        // />
-        <div>cropper</div>
+        <Cropper
+          screen={screen}
+          snapShootCropImage={snapShootCropImage}
+          destroySnipView={destroySnipView}
+        />
       )}
     </>
   );

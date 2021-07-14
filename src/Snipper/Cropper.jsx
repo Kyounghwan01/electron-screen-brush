@@ -1,10 +1,8 @@
-import React from "react";
+import { useState } from "react";
 import { Rnd } from "react-rnd";
 const { remote } = window.require("electron");
+const { screen } = remote;
 
-const { screen } = remote; // Main process modules
-
-// TypeError: Cannot read property 'getPrimaryDisplay' of undefined
 const screenSize = screen.getPrimaryDisplay().size;
 
 const style = {
@@ -15,53 +13,45 @@ const style = {
   margin: "5px"
 };
 
-class Cropper extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      width: "500px",
-      height: "500px",
-      x: screenSize.width / 2 - 250,
-      y: screenSize.height / 2 - 250
-    };
-  }
+const Cropper = ({ snapShootCropImage, destroySnipView }) => {
+  const [size, setSize] = useState({
+    width: "500px",
+    height: "500px",
+    x: screenSize.width / 2 - 250,
+    y: screenSize.height / 2 - 250
+  });
 
-  render() {
-    return (
-      <Rnd
-        style={style}
-        size={{ width: this.state.width, height: this.state.height }}
-        position={{ x: this.state.x, y: this.state.y }}
-        onDragStop={(e, d) => {
-          this.setState({ x: d.x, y: d.y });
-        }}
-        onResize={(e, direction, ref, delta, position) => {
-          this.setState({
-            width: ref.style.width,
-            height: ref.style.height,
-            x: position.x,
-            y: position.y
-          });
-        }}
-        bounds={"parent"}
-      >
-        <div className="rnd-controls">
-          <button
-            className="btn btn-primary"
-            onClick={this.props.snip.bind(this, this.state)}
-          >
-            Capture
-          </button>
-          <button
-            onClick={this.props.destroySnipView.bind(this)}
-            className="btn btn-primary"
-          >
-            Cancel
-          </button>
-        </div>
-      </Rnd>
-    );
-  }
-}
+  return (
+    <Rnd
+      style={style}
+      size={{ width: size.width, height: size.height }}
+      position={{ x: size.x, y: size.y }}
+      onDragStop={(e, d) => {
+        setSize({ ...size, x: d.x, y: d.y });
+      }}
+      onResize={(e, direction, ref, delta, position) => {
+        setSize({
+          width: ref.style.width,
+          height: ref.style.height,
+          x: position.x,
+          y: position.y
+        });
+      }}
+      bounds={"parent"}
+    >
+      <div className="rnd-controls">
+        <button
+          className="btn btn-primary"
+          onClick={() => snapShootCropImage(size)}
+        >
+          Capture
+        </button>
+        <button onClick={destroySnipView} className="btn btn-primary">
+          Cancel
+        </button>
+      </div>
+    </Rnd>
+  );
+};
 
 export default Cropper;

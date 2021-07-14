@@ -11,6 +11,9 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    // frame: false, // 상단 바
+    // transparent: true, // 요소 빼고 배경 투명하게
+    // kiosk: true, // 터치가능하게
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
