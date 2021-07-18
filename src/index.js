@@ -1,15 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
-
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./index.css";
-
-// import Snipper from "./Snipper/Snipper";
+import { ImageProvider } from "./context";
 import NewSnipper from "./Snipper/NewSnipper";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <NewSnipper />
+    <ImageProvider>
+      <NewSnipper />
+    </ImageProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

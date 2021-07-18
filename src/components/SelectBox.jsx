@@ -1,9 +1,17 @@
-const SelectBox = ({ list = [], setter }) => {
+import React, { useContext } from "react";
+import { ImageContext } from "../context";
+
+const SelectBox = () => {
+  const { data, setImageData } = useContext(ImageContext);
+
   return (
     <div className="form-group">
-      <select className="form-select" onChange={e => setter(e.target.value)}>
+      <select
+        className="form-select"
+        onChange={e => setImageData({ selectWindow: e.target.value })}
+      >
         <option value="">--select screen--</option>
-        {list.map(window => (
+        {data.windowList.map(window => (
           <option key={window.id} value={window.id}>
             {window.name}
           </option>

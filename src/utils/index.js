@@ -22,8 +22,7 @@ export const saveToDisk = (img, discardSnip) => {
   );
 };
 
-export const getImgUrl = async (base64data, mode, coordinate, cb) => {
-  // add to buffer base64 image instead of saving locally in order to manipulate with Jimp
+export const getImgUrl = async (base64data, cb) => {
   let encondedImageBuffer = new Buffer(
     base64data.replace(/^data:image\/(png|gif|jpeg);base64,/, ""),
     "base64"
@@ -31,29 +30,12 @@ export const getImgUrl = async (base64data, mode, coordinate, cb) => {
 
   Jimp.read(encondedImageBuffer, (err, image) => {
     if (err) throw err;
-
-    const crop =
-      mode === "fullScreen"
-        ? image
-        : image.crop(
-            coordinate.x,
-            coordinate.y,
-            parseInt(coordinate.width, 10),
-            parseInt(coordinate.height, 10)
-          );
-
-    crop.getBase64("image/png", (err, base64data) => cb(base64data));
+    image.getBase64("image/png", (err, base64data) => cb(base64data));
   });
 };
 
-export const getScreenShot = async (
-  imageFormat,
-  selectWindow,
-  handleStream
-) => {
+export const getScreenShot = async (selectWindow, handleStream) => {
   try {
-    imageFormat = imageFormat || "image/png";
-
     console.log("desktopCapturer getSources");
 
     try {
@@ -71,7 +53,7 @@ export const getScreenShot = async (
         }
       });
       console.log("stream getUserMedia res", stream);
-      handleStream(stream, imageFormat);
+      handleStream(stream);
     } catch (e) {
       console.log(e);
     }

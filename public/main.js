@@ -1,5 +1,4 @@
-const { app, BrowserWindow } = require("electron");
-
+const { app, BrowserWindow, screen } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
 const url = require("url");
@@ -7,10 +6,12 @@ const url = require("url");
 require("@electron/remote/main").initialize();
 
 function createWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width,
+    height,
     // frame: false, // 상단 바
     // transparent: true, // 요소 빼고 배경 투명하게
     // kiosk: true, // 터치가능하게

@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
 import "./Snipper.scss";
-import Cropper from "./Cropper";
 import Jimp from "jimp/es";
 
 const { ipcRenderer, desktopCapturer, shell, remote } =
@@ -327,10 +326,7 @@ class Snipper extends React.Component {
             )}
           </Fragment>
         ) : (
-          <Cropper
-            snip={this.snip.bind(this)}
-            destroySnipView={this.destroySnipView.bind(this)}
-          />
+          <></>
         )}
       </Fragment>
     );
