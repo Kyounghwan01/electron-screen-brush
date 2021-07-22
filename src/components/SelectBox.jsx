@@ -8,6 +8,7 @@ const SelectBox = () => {
     <div className="form-group">
       <select
         className="form-select"
+        style={{ lineHeight: 1 }}
         onChange={e => setImageData({ selectWindow: e.target.value })}
       >
         <option value="">--select screen--</option>

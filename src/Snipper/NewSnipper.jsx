@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from "react";
 import "./Snipper.scss";
 import { ImageContext } from "../context";
 import SelectBox from "../components/SelectBox";
 import CloseBtn from "../components/CloseBtn";
 import ImageCrop from "../components/ImageCrop";
-import { saveToDisk, getImgUrl, getScreenShot } from "../utils";
+import { saveToDisk, getImgUrl, getScreenShot, onSelectFile } from "../utils";
 
 const { desktopCapturer, remote } = window.require("electron");
 
@@ -98,12 +99,12 @@ const NewSnipper = () => {
             </div>
           )}
 
-          <div>
+          <div style={{ display: "flex" }}>
             {data.mode === "none" ? (
               <>
                 {data.selectWindow && (
                   <button className="btn btn-primary" onClick={captureScreen}>
-                    capture
+                    Capture
                   </button>
                 )}
               </>
@@ -122,7 +123,7 @@ const NewSnipper = () => {
                       className="btn btn-primary mr-2"
                       // onClick={() => saveToDisk(image, discardSnip)}
                     >
-                      brush
+                      Brush
                     </button>
 
                     <button
@@ -134,9 +135,23 @@ const NewSnipper = () => {
                   </>
                 ) : (
                   <>
-                    <button className="btn btn-primary mr-2" onClick={cutImage}>
-                      cut!
-                    </button>
+                    {data.mode === "fileUpload" ? (
+                      <button
+                        className="btn btn-primary mr-2"
+                        onClick={() => setImageData({ mode: "crop" })}
+                      >
+                        Crop image
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="btn btn-primary mr-2"
+                          onClick={cutImage}
+                        >
+                          Cut
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
 
@@ -145,22 +160,40 @@ const NewSnipper = () => {
                 </button>
               </div>
             )}
+            {data.mode === "none" && (
+              <>
+                <label
+                  className="btn btn-primary file-upload-btn"
+                  for="input-file"
+                  accept="image/*"
+                >
+                  File-upload
+                </label>
+                <input
+                  type="file"
+                  id="input-file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={e => onSelectFile(e, setImageData)}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {data.image && (
         <div className="snipped-image">
-          {data.mode === "capture" ? (
-            <img className="preview" src={data.image} alt="" />
-          ) : (
-            <div className="preview">
+          <div className="preview">
+            {data.mode === "capture" || data.mode === "fileUpload" ? (
+              <img className="preview" src={data.image} alt="capture-img" />
+            ) : (
               <ImageCrop
                 previewCanvasRef={previewCanvasRef}
                 captureImage={data.image}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </>

@@ -55,6 +55,8 @@ body {
       button {
         width: 130px;
         margin-right: 5px;
+        line-height: 1;
+        font-size: 18px;
       }
     }
     .margin-20 {
@@ -67,4 +69,11 @@ body {
       align-items: center;
     }
   }
+}
+button {
+  line-height: 1;
+  font-size: 30px;
+}
+.file-upload-btn {
+  line-height: 1 !important;
 }

@@ -61,3 +61,13 @@ export const getScreenShot = async (selectWindow, handleStream) => {
     console.log(e);
   }
 };
+
+export const onSelectFile = (e, setData) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const reader = new FileReader();
+    reader.addEventListener("load", () =>
+      setData({ image: reader.result, mode: "fileUpload" })
+    );
+    reader.readAsDataURL(e.target.files[0]);
+  }
+};
