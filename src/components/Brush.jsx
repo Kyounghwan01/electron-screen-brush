@@ -1,0 +1,117 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useContext
+} from "react";
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
+import { ImageContext } from "../context";
+
+export default function Brush() {
+  const [upImg, setUpImg] = useState();
+  const imgRef = useRef(null);
+  const previewCanvasRef = useRef(null);
+  const [crop, setCrop] = useState({ unit: "%", width: 100, height: 100 });
+  const [completedCrop, setCompletedCrop] = useState(null);
+  const [done, setDone] = useState(false);
+  const { data } = useContext(ImageContext);
+
+  const onLoad = useCallback(img => {
+    imgRef.current = img;
+  }, []);
+
+  useEffect(() => {
+    setUpImg(data.image);
+
+    if (!completedCrop || !previewCanvasRef.current || !imgRef.current) {
+      return;
+    }
+
+    const image = imgRef.current;
+    const canvas = previewCanvasRef.current;
+    const crop = completedCrop;
+
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    const ctx = canvas.getContext("2d");
+    const pixelRatio = window.devicePixelRatio;
+
+    canvas.width = crop.width * pixelRatio;
+    canvas.height = crop.height * pixelRatio;
+
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.imageSmoothingQuality = "high";
+
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width,
+      crop.height
+    );
+
+    setDone(true);
+  }, [completedCrop]);
+
+  return (
+    <>
+      {!done && (
+        <ReactCrop
+          src={upImg}
+          onImageLoaded={onLoad}
+          crop={crop}
+          onChange={c => setCrop(c)}
+          onComplete={c => setCompletedCrop(c)}
+        />
+      )}
+
+      <canvas
+        ref={previewCanvasRef}
+        style={{
+          width: Math.round(completedCrop?.width ?? 0),
+          height: Math.round(completedCrop?.height ?? 0)
+        }}
+      />
+    </>
+  );
+}
+
+/**
+ * 
+ * ×
+TypeError: Failed to execute 'drawImage' on 'CanvasRenderingContext2D': The provided value is not of type '(CSSImageValue or HTMLImageElement or SVGImageElement or HTMLVideoElement or HTMLCanvasElement or ImageBitmap or OffscreenCanvas or VideoFrame)'
+
+-> 이미지로드되지 않은 상태에서 image를 canvas에 넣을때 생기는 에러
+ */
+
+/**
+const Brush = () => {
+  const canvasRef = useRef(null);
+  const { data } = useContext(ImageContext);
+
+  useEffect(() => {
+    console.log(data);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.drawImage(data.image, 0, 0);
+  }, [canvasRef]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: "100%",
+        height: "100%"
+      }}
+    />
+  );
+};
+
+export default Brush;
+ */

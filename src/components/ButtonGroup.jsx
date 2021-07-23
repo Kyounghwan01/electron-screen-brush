@@ -39,7 +39,7 @@ const ButtonGroup = ({ captureScreen, cutImage }) => {
     return (
       <>
         {[
-          { title: "Brush", func: () => console.log(1) },
+          { title: "Brush", func: () => setImageData({ mode: "brush" }) },
           {
             title: "Crop image",
             func: () => setImageData({ mode: "crop" })
@@ -83,9 +83,33 @@ const ButtonGroup = ({ captureScreen, cutImage }) => {
           title: "Save to Disk",
           func: () => saveToDisk(data.image, discardSnip)
         },
-        { title: "Brush", func: () => console.log(1) },
+        { title: "Brush", func: () => setImageData({ mode: "brush" }) },
         {
           title: "Crop image",
+          func: () => setImageData({ mode: "crop" })
+        },
+        {
+          title: "Discard",
+          func: discardSnip
+        }
+      ].map(({ title, func }) => (
+        <button key={title} className="btn btn-primary mr-2" onClick={func}>
+          {title}
+        </button>
+      ))}
+    </>
+  );
+
+  const BrushModeButtonGroup = () => (
+    <>
+      {[
+        {
+          title: "Save to Disk",
+          func: () => saveToDisk(data.image, discardSnip)
+        },
+        {
+          title: "Crop image",
+          // todo: brush 된 이미지 저장 후 crop 모드로 이동
           func: () => setImageData({ mode: "crop" })
         },
         {
@@ -110,6 +134,8 @@ const ButtonGroup = ({ captureScreen, cutImage }) => {
         return <CropModeButtonGroup />;
       case "capture":
         return <CaptureModeButtonGroup />;
+      case "brush":
+        return <BrushModeButtonGroup />;
       default:
         return <NoneModeButtonGroup />;
     }

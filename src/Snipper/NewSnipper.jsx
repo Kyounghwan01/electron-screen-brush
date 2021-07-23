@@ -6,6 +6,7 @@ import SelectBox from "../components/SelectBox";
 import CloseBtn from "../components/CloseBtn";
 import ImageCrop from "../components/ImageCrop";
 import ButtonGroup from "../components/ButtonGroup";
+import Brush from "../components/Brush";
 import { getImgUrl, getScreenShot } from "../utils";
 
 const { desktopCapturer, remote } = window.require("electron");
@@ -108,10 +109,13 @@ const NewSnipper = () => {
             {data.mode === "capture" || data.mode === "fileUpload" ? (
               <img className="preview" src={data.image} alt="capture-img" />
             ) : (
-              <ImageCrop
-                previewCanvasRef={previewCanvasRef}
-                captureImage={data.image}
-              />
+              <>
+                {data.mode === "brush" ? (
+                  <Brush />
+                ) : (
+                  <ImageCrop previewCanvasRef={previewCanvasRef} />
+                )}
+              </>
             )}
           </div>
         </div>
