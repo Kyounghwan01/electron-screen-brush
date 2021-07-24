@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import "./Snipper.scss";
 import { ImageContext } from "../context";
 import SelectBox from "../components/SelectBox";
@@ -14,7 +14,7 @@ const { desktopCapturer, remote } = window.require("electron");
 const NewSnipper = () => {
   const [currentWindow] = useState(remote.getCurrentWindow());
   const { data, setImageData } = useContext(ImageContext);
-  const previewCanvasRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     setWindows();
@@ -79,7 +79,7 @@ const NewSnipper = () => {
   };
 
   const cutImage = () => {
-    const base64Image = previewCanvasRef.current.toDataURL("image/jpeg");
+    const base64Image = canvasRef.current.toDataURL("image/jpeg");
     setImageData({ image: base64Image, mode: "capture" });
   };
 
@@ -98,7 +98,11 @@ const NewSnipper = () => {
           )}
 
           <div style={{ display: "flex" }}>
-            <ButtonGroup cutImage={cutImage} captureScreen={captureScreen} />
+            <ButtonGroup
+              canvasRef={canvasRef}
+              cutImage={cutImage}
+              captureScreen={captureScreen}
+            />
           </div>
         </div>
       </div>
@@ -111,9 +115,9 @@ const NewSnipper = () => {
             ) : (
               <>
                 {data.mode === "brush" ? (
-                  <Brush />
+                  <Brush canvasRef={canvasRef} />
                 ) : (
-                  <ImageCrop previewCanvasRef={previewCanvasRef} />
+                  <ImageCrop canvasRef={canvasRef} />
                 )}
               </>
             )}

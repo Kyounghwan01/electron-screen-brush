@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { ImageContext } from "../context";
 
 const SelectBox = () => {

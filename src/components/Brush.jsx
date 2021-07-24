@@ -1,87 +1,91 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  useContext
-} from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { ImageContext } from "../context";
 
-export default function Brush() {
+const Brush = ({ canvasRef }) => {
   const [upImg, setUpImg] = useState();
   const imgRef = useRef(null);
-  const previewCanvasRef = useRef(null);
+  const contextRef = useRef(null);
   const [crop, setCrop] = useState({ unit: "%", width: 100, height: 100 });
-  const [completedCrop, setCompletedCrop] = useState(null);
-  const [done, setDone] = useState(false);
+  const [imageSize, setImageSize] = useState(null);
+  const [isFinishImgLoad, setFinishImgLoad] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const { data } = useContext(ImageContext);
-
-  const onLoad = useCallback(img => {
-    imgRef.current = img;
-  }, []);
 
   useEffect(() => {
     setUpImg(data.image);
 
-    if (!completedCrop || !previewCanvasRef.current || !imgRef.current) {
+    if (!imageSize || !canvasRef.current || !imgRef.current) {
       return;
     }
-
     const image = imgRef.current;
-    const canvas = previewCanvasRef.current;
-    const crop = completedCrop;
-
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
+    const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const pixelRatio = window.devicePixelRatio;
 
-    canvas.width = crop.width * pixelRatio;
-    canvas.height = crop.height * pixelRatio;
+    canvas.width = imageSize.width * pixelRatio;
+    canvas.height = imageSize.height * pixelRatio;
 
     ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     ctx.imageSmoothingQuality = "high";
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 5;
+    ctx.drawImage(image, 0, 0, imageSize.width, imageSize.height);
 
-    ctx.drawImage(
-      image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width,
-      crop.height
-    );
+    contextRef.current = ctx;
+    setFinishImgLoad(true);
+  }, [imageSize]);
 
-    setDone(true);
-  }, [completedCrop]);
+  const startDrawing = ({ nativeEvent }) => {
+    const { offsetX, offsetY } = nativeEvent;
+    contextRef.current.beginPath();
+    contextRef.current.moveTo(offsetX, offsetY);
+    setIsDrawing(true);
+  };
+
+  const finishDrawing = () => {
+    contextRef.current.closePath();
+    setIsDrawing(false);
+  };
+
+  const draw = ({ nativeEvent }) => {
+    if (!isDrawing) return;
+
+    const { offsetX, offsetY } = nativeEvent;
+    contextRef.current.lineTo(offsetX, offsetY);
+    contextRef.current.stroke();
+  };
 
   return (
     <>
-      {!done && (
+      {!isFinishImgLoad && (
         <ReactCrop
           src={upImg}
-          onImageLoaded={onLoad}
+          onImageLoaded={img => (imgRef.current = img)}
           crop={crop}
           onChange={c => setCrop(c)}
-          onComplete={c => setCompletedCrop(c)}
+          onComplete={c => setImageSize(c)}
         />
       )}
 
       <canvas
-        ref={previewCanvasRef}
+        ref={canvasRef}
+        onMouseDown={startDrawing}
+        onMouseUp={finishDrawing}
+        onMouseMove={draw}
         style={{
-          width: Math.round(completedCrop?.width ?? 0),
-          height: Math.round(completedCrop?.height ?? 0)
+          width: Math.round(imageSize?.width ?? 0),
+          height: Math.round(imageSize?.height ?? 0)
         }}
       />
     </>
   );
-}
+};
+
+export default Brush;
 
 /**
  * 

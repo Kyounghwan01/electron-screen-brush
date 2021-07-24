@@ -1,16 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  useContext
-} from "react";
+import { useState, useCallback, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { ImageContext } from "../context";
 
-export default function ImageCrop({ previewCanvasRef }) {
+const ImageCrop = ({ canvasRef }) => {
   const [upImg, setUpImg] = useState();
   const imgRef = useRef(null);
   const [crop, setCrop] = useState({ unit: "%", width: 30, aspect: 16 / 9 });
@@ -24,12 +18,12 @@ export default function ImageCrop({ previewCanvasRef }) {
   useEffect(() => {
     setUpImg(data.image);
 
-    if (!completedCrop || !previewCanvasRef.current || !imgRef.current) {
+    if (!completedCrop || !canvasRef.current || !imgRef.current) {
       return;
     }
 
     const image = imgRef.current;
-    const canvas = previewCanvasRef.current;
+    const canvas = canvasRef.current;
     const crop = completedCrop;
 
     const scaleX = image.naturalWidth / image.width;
@@ -67,7 +61,7 @@ export default function ImageCrop({ previewCanvasRef }) {
       />
       <div style={{ display: "none" }}>
         <canvas
-          ref={previewCanvasRef}
+          ref={canvasRef}
           style={{
             width: Math.round(completedCrop?.width ?? 0),
             height: Math.round(completedCrop?.height ?? 0)
@@ -76,4 +70,6 @@ export default function ImageCrop({ previewCanvasRef }) {
       </div>
     </>
   );
-}
+};
+
+export default ImageCrop;

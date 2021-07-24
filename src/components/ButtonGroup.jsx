@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useCallback } from "react";
+import { useContext, useCallback } from "react";
 import "../Snipper/Snipper.scss";
 import { ImageContext } from "../context";
 import { saveToDisk, onSelectFile } from "../utils";
 
-const ButtonGroup = ({ captureScreen, cutImage }) => {
+const ButtonGroup = ({ captureScreen, cutImage, canvasRef }) => {
   const { data, setImageData } = useContext(ImageContext);
 
   const discardSnip = () => {
@@ -105,12 +105,16 @@ const ButtonGroup = ({ captureScreen, cutImage }) => {
       {[
         {
           title: "Save to Disk",
-          func: () => saveToDisk(data.image, discardSnip)
+          func: () =>
+            saveToDisk(canvasRef.current.toDataURL("image/jpeg"), discardSnip)
         },
         {
           title: "Crop image",
-          // todo: brush 된 이미지 저장 후 crop 모드로 이동
-          func: () => setImageData({ mode: "crop" })
+          func: () =>
+            setImageData({
+              image: canvasRef.current.toDataURL("image/jpeg"),
+              mode: "crop"
+            })
         },
         {
           title: "Discard",
