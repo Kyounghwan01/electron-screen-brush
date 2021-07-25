@@ -29,10 +29,6 @@ const NewSnipper = () => {
     setImageData({ windowList: res });
   };
 
-  const destroyCurrentWindow = () => {
-    currentWindow.close();
-  };
-
   const handleStream = stream => {
     console.log("handleStream");
     // Create hidden video tag
@@ -86,7 +82,7 @@ const NewSnipper = () => {
   return (
     <>
       <div className="snip-controls text-center">
-        <CloseBtn destroyCurrentWindow={destroyCurrentWindow} />
+        <CloseBtn />
 
         <div className="snipper-container">
           <h2 className="margin-20">Snipper</h2>

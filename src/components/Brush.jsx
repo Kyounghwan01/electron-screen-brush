@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { ImageContext } from "../context";
+import "./Brush.scss";
 
 const Brush = ({ canvasRef }) => {
   const [upImg, setUpImg] = useState();
@@ -12,6 +13,7 @@ const Brush = ({ canvasRef }) => {
   const [imageSize, setImageSize] = useState(null);
   const [isFinishImgLoad, setFinishImgLoad] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [lineWeight, setLineWeight] = useState(2.5);
   const { data } = useContext(ImageContext);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const Brush = ({ canvasRef }) => {
     ctx.imageSmoothingQuality = "high";
     ctx.lineCap = "round";
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 5;
+    ctx.lineWidth = lineWeight;
     ctx.drawImage(image, 0, 0, imageSize.width, imageSize.height);
 
     contextRef.current = ctx;
@@ -59,6 +61,20 @@ const Brush = ({ canvasRef }) => {
     contextRef.current.stroke();
   };
 
+  const changeStrokeColor = event => {
+    const color = event.target.style.backgroundColor || "#ffffff";
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+  };
+
+  function handleRangeChange(event) {
+    const size = event.target.value;
+    setLineWeight(size);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.lineWidth = size;
+  }
+
   return (
     <>
       {!isFinishImgLoad && (
@@ -81,41 +97,48 @@ const Brush = ({ canvasRef }) => {
           height: Math.round(imageSize?.height ?? 0)
         }}
       />
+
+      <div className="brush-dock">
+        {[
+          "#2c2c2c",
+          "#ff3b30",
+          "#ff9500",
+          "#ffcc00",
+          "#4cd963",
+          "#5ac9fa",
+          "#0579ff",
+          "#5856d6",
+          "#ffffff"
+        ].map((color, index) => (
+          <div key={index}>
+            {color === "#ffffff" ? (
+              <div className="controls__erase" onClick={changeStrokeColor}>
+                <div className="top" />
+                <div className="middle" />
+              </div>
+            ) : (
+              <div
+                className="controls__color"
+                style={{ backgroundColor: color }}
+                onClick={e => changeStrokeColor(e)}
+              />
+            )}
+          </div>
+        ))}
+
+        <div className="controls__range">
+          <input
+            type="range"
+            min="0.1"
+            max="5.0"
+            value={lineWeight}
+            step="0.1"
+            onChange={handleRangeChange}
+          />
+        </div>
+      </div>
     </>
   );
 };
 
 export default Brush;
-
-/**
- * 
- * ×
-TypeError: Failed to execute 'drawImage' on 'CanvasRenderingContext2D': The provided value is not of type '(CSSImageValue or HTMLImageElement or SVGImageElement or HTMLVideoElement or HTMLCanvasElement or ImageBitmap or OffscreenCanvas or VideoFrame)'
-
--> 이미지로드되지 않은 상태에서 image를 canvas에 넣을때 생기는 에러
- */
-
-/**
-const Brush = () => {
-  const canvasRef = useRef(null);
-  const { data } = useContext(ImageContext);
-
-  useEffect(() => {
-    console.log(data);
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.drawImage(data.image, 0, 0);
-  }, [canvasRef]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        width: "100%",
-        height: "100%"
-      }}
-    />
-  );
-};
-
-export default Brush;
- */
