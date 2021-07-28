@@ -20,6 +20,7 @@
     "react-image-crop": "^8.6.12",
     "react-scripts": "4.0.3",
     "spectre.css": "^0.5.9",
+    "styled-components": "^5.3.0",
     "uuid": "^8.3.2",
     "web-vitals": "^1.0.1"
   },

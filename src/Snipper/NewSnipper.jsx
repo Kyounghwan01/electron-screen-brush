@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useContext, useRef } from "react";
 import "./Snipper.scss";
-import { ImageContext } from "../context";
+import { ImageContext, ModalRoot } from "../context";
 import SelectBox from "../components/SelectBox";
 import CloseBtn from "../components/CloseBtn";
 import ImageCrop from "../components/ImageCrop";
@@ -81,6 +81,7 @@ const NewSnipper = () => {
 
   return (
     <>
+      <ModalRoot />
       <div className="snip-controls text-center">
         <CloseBtn />
 

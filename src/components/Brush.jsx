@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { ImageContext } from "../context";
+import { ImageContext, ModalContext } from "../context";
 import "./Brush.scss";
 
 const Brush = ({ canvasRef }) => {
@@ -14,7 +14,8 @@ const Brush = ({ canvasRef }) => {
   const [isFinishImgLoad, setFinishImgLoad] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lineWeight, setLineWeight] = useState(2.5);
-  const { data } = useContext(ImageContext);
+  const { data, setPlatteColor } = useContext(ImageContext);
+  const { showModal } = useContext(ModalContext);
 
   useEffect(() => {
     setUpImg(data.image);
@@ -68,12 +69,31 @@ const Brush = ({ canvasRef }) => {
     ctx.fillStyle = color;
   };
 
-  function handleRangeChange(event) {
+  const handleRangeChange = event => {
     const size = event.target.value;
     setLineWeight(size);
     const ctx = canvasRef.current.getContext("2d");
     ctx.lineWidth = size;
-  }
+  };
+
+  const erasePaper = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.drawImage(imgRef.current, 0, 0, imageSize.width, imageSize.height);
+  };
+
+  const popColorSelector = () => {
+    import("../components/PalletPop").then(({ default: Component }) => {
+      showModal({
+        component: Component,
+        modalProps: {
+          title: "h2h2h2h2h2h2",
+          desc: "h3h3h3h3h3"
+        }
+      });
+    });
+  };
 
   return (
     <>
@@ -99,29 +119,31 @@ const Brush = ({ canvasRef }) => {
       />
 
       <div className="brush-dock">
-        {[
-          "#2c2c2c",
-          "#ff3b30",
-          "#ff9500",
-          "#ffcc00",
-          "#4cd963",
-          "#5ac9fa",
-          "#0579ff",
-          "#5856d6",
-          "#ffffff"
-        ].map((color, index) => (
+        {[...setPlatteColor(), "selector", "erase"].map((color, index) => (
           <div key={index}>
-            {color === "#ffffff" ? (
-              <div className="controls__erase" onClick={changeStrokeColor}>
+            {color === "erase" ? (
+              <div className="controls__erase" onClick={erasePaper}>
                 <div className="top" />
                 <div className="middle" />
               </div>
             ) : (
-              <div
-                className="controls__color"
-                style={{ backgroundColor: color }}
-                onClick={e => changeStrokeColor(e)}
-              />
+              <>
+                {color === "selector" ? (
+                  <div className="controls__color" onClick={popColorSelector}>
+                    <img
+                      src="rainbow-circle.png"
+                      style={{ width: "50px", borderRadius: "50%" }}
+                      alt="색편집"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="controls__color"
+                    style={{ backgroundColor: color }}
+                    onClick={e => changeStrokeColor(e)}
+                  />
+                )}
+              </>
             )}
           </div>
         ))}
