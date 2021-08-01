@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import "./Snipper.scss";
 import Jimp from "jimp/es";
 
 const { ipcRenderer, desktopCapturer, shell, remote } =

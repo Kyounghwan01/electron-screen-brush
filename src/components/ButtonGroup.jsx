@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useCallback } from "react";
-import "../Snipper/Snipper.scss";
-import { ImageContext } from "../context";
-import { saveToDisk, onSelectFile } from "../utils";
+import { ImageContext } from "context";
+import { saveToDisk, onSelectFile } from "utils";
 
 const ButtonGroup = ({ captureScreen, cutImage, canvasRef }) => {
   const { data, setImageData } = useContext(ImageContext);

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import { ImageContext } from "../context";
+import { ImageContext } from "context";
 import styled from "styled-components";
 
 const PalletPop = ({ hideModal }) => {

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ImageContext } from "../context";
+import { ImageContext } from "context";
 
 const SelectBox = () => {
   const { data, setImageData } = useContext(ImageContext);

@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { ImageContext } from "../context";
+import { ImageContext } from "context";
 
 const ImageCrop = ({ canvasRef }) => {
   const [upImg, setUpImg] = useState();

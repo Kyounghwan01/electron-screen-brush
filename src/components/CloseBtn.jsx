@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../Snipper/Snipper.scss";
 
 const { remote } = window.require("electron");
 

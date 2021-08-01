@@ -1,17 +1,15 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useContext, useRef } from "react";
-import "./Snipper.scss";
-import { ImageContext, ModalRoot } from "../context";
-import SelectBox from "../components/SelectBox";
-import CloseBtn from "../components/CloseBtn";
-import ImageCrop from "../components/ImageCrop";
-import ButtonGroup from "../components/ButtonGroup";
-import Brush from "../components/Brush";
-import { getImgUrl, getScreenShot } from "../utils";
+import { ImageContext, ModalRoot } from "context";
+import SelectBox from "components/SelectBox";
+import CloseBtn from "components/CloseBtn";
+import ImageCrop from "components/ImageCrop";
+import ButtonGroup from "components/ButtonGroup";
+import Brush from "components/Brush";
+import { getImgUrl, getScreenShot } from "utils";
 
 const { desktopCapturer, remote } = window.require("electron");
 
-const NewSnipper = () => {
+const Main = () => {
   const [currentWindow] = useState(remote.getCurrentWindow());
   const { data, setImageData } = useContext(ImageContext);
   const canvasRef = useRef(null);
@@ -125,4 +123,4 @@ const NewSnipper = () => {
   );
 };
 
-export default NewSnipper;
+export default Main;

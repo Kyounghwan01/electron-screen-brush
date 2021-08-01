@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useRef, useEffect, useContext } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { ImageContext, ModalContext } from "../context";
-import "./Brush.scss";
+import styled from "styled-components";
+import { ImageContext, ModalContext } from "context";
 
 const Brush = ({ canvasRef }) => {
   const [upImg, setUpImg] = useState();
@@ -84,7 +83,7 @@ const Brush = ({ canvasRef }) => {
   };
 
   const popColorSelector = () => {
-    import("../components/PalletPop").then(({ default: Component }) => {
+    import("./popup/PalletPop").then(({ default: Component }) => {
       showModal({
         component: Component,
         modalProps: {
@@ -96,7 +95,7 @@ const Brush = ({ canvasRef }) => {
   };
 
   return (
-    <>
+    <BrushBlock>
       {!isFinishImgLoad && (
         <ReactCrop
           src={upImg}
@@ -159,8 +158,58 @@ const Brush = ({ canvasRef }) => {
           />
         </div>
       </div>
-    </>
+    </BrushBlock>
   );
 };
+
+const BrushBlock = styled.div`
+  .controls__color {
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 10px 0 0 10px;
+  }
+
+  .controls__erase {
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    cursor: pointer;
+    margin: 10px 0 0 10px;
+    display: flex;
+    border-radius: 8px;
+    width: 50px;
+    .top {
+      width: 30px;
+      height: 40px;
+      background-color: dodgerblue;
+    }
+    .middle {
+      width: 20px;
+      height: 40px;
+      background-color: white;
+      border-radius: 0 8px 8px 0;
+    }
+  }
+
+  .brush-dock {
+    position: absolute;
+    left: 0;
+    height: 100vh;
+    z-index: 1;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .controls__range {
+    margin: 10px 0 0 10px;
+    input {
+      width: 100px;
+    }
+  }
+`;
 
 export default Brush;

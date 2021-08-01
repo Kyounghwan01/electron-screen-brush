@@ -1,7 +1,6 @@
 // 일렉트론 블로그 포스팅용 자료
 
 import React, { useState, useEffect, useContext, useRef } from "react";
-import "./Snipper.scss";
 import { ImageContext } from "../context";
 import SelectBox from "./SelectBox";
 import CloseBtn from "./CloseBtn";
